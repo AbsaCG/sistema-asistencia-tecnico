@@ -13,6 +13,11 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * Relations to eager load on every query
+     */
+    protected $with = ['role'];
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -77,5 +82,95 @@ class User extends Authenticatable
     public function reports()
     {
         return $this->hasMany(AttendanceReport::class, 'generated_by');
+    }
+
+    /**
+     * Check if the user has a permission.
+     * Considers both the legacy JSON `permissions` on Role and the normalized pivot table.
+     */
+    public function hasPermission(string $permission): bool
+    {
+        $role = $this->role;
+
+        if (!$role) {
+            return false;
+        }
+
+        // Legacy JSON permissions
+        $jsonPerms = $role->permissions;
+        if (is_array($jsonPerms) && in_array($permission, $jsonPerms)) {
+            return true;
+        }
+
+        // Normalized pivot permissions
+        if ($role->permissionModels()->where('slug', $permission)->exists()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if the user has a specific role by name or slug
+     */
+    public function hasRole(string $roleName): bool
+    {
+        if (!$this->role) {
+            return false;
+        }
+        
+        $roleName = strtolower($roleName);
+        return strtolower($this->role->name) === $roleName 
+            || strtolower($this->role->slug) === $roleName;
+    }
+
+    /**
+     * Check if the user has any of the given roles
+     */
+    public function hasAnyRole(array $roles): bool
+    {
+        if (!$this->role) {
+            return false;
+        }
+
+        foreach ($roles as $role) {
+            if ($this->hasRole($role)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if the user is an admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin');
+    }
+
+    /**
+     * Check if the user is a teacher
+     */
+    public function isTeacher(): bool
+    {
+        return $this->hasRole('teacher');
+    }
+
+    /**
+     * Check if the user is a student
+     */
+    public function isStudent(): bool
+    {
+        return $this->hasRole('student');
+    }
+
+    /**
+     * Check if the user is staff
+     */
+    public function isStaff(): bool
+    {
+        return $this->hasRole('staff');
     }
 }

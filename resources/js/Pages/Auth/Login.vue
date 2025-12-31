@@ -75,11 +75,50 @@
         </div>
       </form>
 
-      <!-- Demo Credentials -->
-      <div class="bg-indigo-100 border border-indigo-300 rounded-lg p-4">
-        <p class="text-sm text-indigo-900 font-medium mb-2">Credenciales de Prueba:</p>
-        <p class="text-xs text-indigo-800">Email: <code class="bg-indigo-50 px-1">admin@example.com</code></p>
-        <p class="text-xs text-indigo-800">Contraseña: <code class="bg-indigo-50 px-1">password</code></p>
+      <!-- Quick Login Buttons -->
+      <div class="bg-white rounded-lg shadow-xl p-6">
+        <p class="text-sm text-gray-700 font-semibold mb-4 text-center">⚡ Acceso Rápido (Desarrollo)</p>
+        <div class="grid grid-cols-1 gap-3">
+          <!-- Admin Button -->
+          <button
+            @click="quickLogin('admin@istp.edu.pe', 'password')"
+            :disabled="processing"
+            class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg shadow-md transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span class="flex items-center">
+              <span class="text-lg mr-3">👨‍💼</span>
+              <span class="font-medium">Administrador</span>
+            </span>
+            <span class="text-xs bg-red-800 px-2 py-1 rounded">Admin</span>
+          </button>
+
+          <!-- Teacher Button -->
+          <button
+            @click="quickLogin('profesor@istp.edu.pe', 'password')"
+            :disabled="processing"
+            class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg shadow-md transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span class="flex items-center">
+              <span class="text-lg mr-3">👨‍🏫</span>
+              <span class="font-medium">Profesor</span>
+            </span>
+            <span class="text-xs bg-blue-800 px-2 py-1 rounded">Teacher</span>
+          </button>
+
+          <!-- Student Button -->
+          <button
+            @click="quickLogin('estudiante@istp.edu.pe', 'password')"
+            :disabled="processing"
+            class="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-lg shadow-md transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span class="flex items-center">
+              <span class="text-lg mr-3">👨‍🎓</span>
+              <span class="font-medium">Estudiante</span>
+            </span>
+            <span class="text-xs bg-green-800 px-2 py-1 rounded">Student</span>
+          </button>
+        </div>
+        <p class="text-xs text-gray-500 text-center mt-4">Contraseña para todos: <code class="bg-gray-100 px-2 py-1 rounded">password</code></p>
       </div>
     </div>
   </div>
@@ -87,31 +126,50 @@
 
 <script setup>
 import { ref } from 'vue';
-import { usePage } from '@inertiajs/inertia-vue3';
-import { useForm } from '@inertiajs/inertia-vue3';
-import { Link } from '@inertiajs/inertia-vue3';
+import { router } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 
-const page = usePage();
 const processing = ref(false);
+const errors = ref({});
 
-const form = useForm({
+const form = ref({
   email: '',
   password: '',
   remember: false,
 });
 
-const errors = ref({});
-
-const submit = async () => {
+const submit = () => {
+  console.log('Submit clicked with data:', form.value);
   processing.value = true;
-  try {
-    await form.post('/login', {
-      onError: (errs) => {
-        errors.value = errs;
-      },
-    });
-  } finally {
-    processing.value = false;
-  }
+  router.post('/login', form.value, {
+    onError: (errs) => {
+      console.log('Login error:', errs);
+      errors.value = errs;
+      processing.value = false;
+    },
+    onSuccess: () => {
+      console.log('Login success, redirecting to dashboard');
+      processing.value = false;
+    },
+  });
+};
+
+const quickLogin = (email, password) => {
+  form.value.email = email;
+  form.value.password = password;
+  form.value.remember = true;
+  
+  processing.value = true;
+  router.post('/login', form.value, {
+    onError: (errs) => {
+      console.log('Quick login error:', errs);
+      errors.value = errs;
+      processing.value = false;
+    },
+    onSuccess: () => {
+      console.log('Quick login success, redirecting to dashboard');
+      processing.value = false;
+    },
+  });
 };
 </script>

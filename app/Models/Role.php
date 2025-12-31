@@ -16,4 +16,13 @@ class Role extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    /**
+     * Permission relation (normalized pivot).
+     * Kept separate name to avoid collision with the existing `permissions` JSON attribute.
+     */
+    public function permissionModels()
+    {
+        return $this->belongsToMany(Permission::class, 'permission_role');
+    }
 }

@@ -17,7 +17,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->foreignId('role_id')->nullable()->constrained('roles')->nullOnDelete();
+            // Define role_id as simple unsignedBigInteger here so migrations can run
+            // even if the `roles` table is created later. Foreign key is added
+            // in a subsequent migration to avoid ordering issues on MySQL.
+            $table->unsignedBigInteger('role_id')->nullable();
             $table->boolean('active')->default(true);
             $table->rememberToken();
             $table->timestamps();

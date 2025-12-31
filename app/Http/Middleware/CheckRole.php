@@ -16,15 +16,33 @@ class CheckRole
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
         if (!auth()->check()) {
-            return redirect('/login');
+            return redirect()->route('login')->with('error', 'Debe iniciar sesión');
         }
 
-        $userRole = auth()->user()->role?->slug;
+        $user = auth()->user();
 
-        if (!in_array($userRole, $roles)) {
-            abort(403, 'No tiene permiso para acceder a esta página.');
+        if (!$user->role) {
+            abort(403, 'Usuario sin rol asignado. Contacte al administrador.');
         }
 
-        return $next($request);
+        // Check if user has any of the required roles
+        foreach ($roles as $role) {
+            // Support for permissions (perm:permission_name)
+            if (str_starts_with($role, 'perm:')) {
+                $perm = substr($role, 5);
+                if ($user->hasPermission($perm)) {
+                    return $next($request);
+                }
+            } 
+            // Check by role name or slug using hasRole method
+            else {
+                if ($user->hasRole($role)) {
+                    return $next($request);
+                }
+            }
+        }
+
+        // If no roles matched, deny access
+        abort(403, 'No tiene permisos suficientes para acceder a esta sección.');
     }
 }

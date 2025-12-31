@@ -11,7 +11,7 @@ class Attendance extends Model
     const STATUS_LATE = 'late';
     const STATUS_JUSTIFIED = 'justified';
 
-    protected $fillable = ['student_id', 'course_assignment_id', 'date', 'time', 'status', 'registered_by', 'notes'];
+    protected $fillable = ['student_id', 'course_assignment_id', 'date', 'time', 'status', 'registered_by', 'notes', 'attendance_source', 'location', 'device_token'];
 
     protected $casts = [
         'date' => 'date',

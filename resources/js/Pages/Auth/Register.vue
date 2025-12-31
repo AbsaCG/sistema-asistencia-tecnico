@@ -99,30 +99,32 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useForm } from '@inertiajs/inertia-vue3';
-import { Link } from '@inertiajs/inertia-vue3';
+import { router } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 
 const processing = ref(false);
+const errors = ref({});
 
-const form = useForm({
+const form = ref({
   name: '',
   email: '',
   password: '',
   password_confirmation: '',
 });
 
-const errors = ref({});
-
-const submit = async () => {
+const submit = () => {
+  console.log('Register clicked with data:', form.value);
   processing.value = true;
-  try {
-    await form.post('/register', {
-      onError: (errs) => {
-        errors.value = errs;
-      },
-    });
-  } finally {
-    processing.value = false;
-  }
+  router.post('/register', form.value, {
+    onError: (errs) => {
+      console.log('Register error:', errs);
+      errors.value = errs;
+      processing.value = false;
+    },
+    onSuccess: () => {
+      console.log('Register success, redirecting to dashboard');
+      processing.value = false;
+    },
+  });
 };
 </script>

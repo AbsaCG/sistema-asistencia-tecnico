@@ -21,6 +21,17 @@ class LoginController
 
         if (auth()->attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
+            
+            $user = auth()->user();
+            
+            // Redirigir según el rol del usuario
+            if ($user->role && $user->role->slug === 'student') {
+                return redirect('/student/profile');
+            } elseif ($user->role && $user->role->slug === 'teacher') {
+                return redirect('/courses');
+            }
+            
+            // Por defecto (admin), ir al dashboard
             return redirect()->intended('/dashboard');
         }
 

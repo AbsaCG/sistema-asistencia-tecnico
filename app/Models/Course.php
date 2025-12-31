@@ -6,7 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Course extends Model
 {
-    protected $fillable = ['name', 'description', 'code', 'level_id'];
+    protected $fillable = [
+        'name', 
+        'description', 
+        'code', 
+        'technical_career_id',
+        'cycle',
+        'credits',
+        'hours'
+    ];
+
+    public function technicalCareer()
+    {
+        return $this->belongsTo(TechnicalCareer::class);
+    }
 
     public function level()
     {
