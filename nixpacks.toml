@@ -17,8 +17,9 @@ cmds = [
 
 [phases.deploy]
 cmds = [
-    'chmod +x ./scripts/railway-deploy.sh',
-    './scripts/railway-deploy.sh'
+    'php artisan migrate --force || echo "Migrations failed or already done"',
+    'php artisan db:seed --class=RoleSeeder --force || echo "RoleSeeder failed or already done"',
+    'php artisan db:seed --class=CompleteDataSeeder --force || echo "CompleteDataSeeder failed or already done"'
 ]
 
 [start]
