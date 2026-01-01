@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+           // Trust proxies for Railway/HTTPS
+           $middleware->trustProxies(at: '*');
+           
            // Register Inertia middleware
            $middleware->web(append: [
                \App\Http\Middleware\HandleInertiaRequests::class,
