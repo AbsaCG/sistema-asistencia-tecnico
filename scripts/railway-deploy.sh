@@ -16,9 +16,12 @@ php artisan migrate --force --no-interaction
 
 # Verificar si existen roles
 echo "🔍 Verificando datos iniciales..."
-ROLE_COUNT=$(php artisan tinker --execute="echo \App\Models\Role::count();")
+php artisan migrate:status
 
-if [ "$ROLE_COUNT" -eq "0" ]; then
+# Ejecutar seeders solo si no hay usuarios
+USER_COUNT=$(php -r "require 'vendor/autoload.php'; \$app = require_once 'bootstrap/app.php'; \$app->make('Illuminate\Contracts\Console\Kernel')->bootstrap(); echo App\Models\User::count();")
+
+if [ "$USER_COUNT" -eq "0" ]; then
     echo "📦 Base de datos vacía, ejecutando seeders..."
     
     # Ejecutar RoleSeeder
@@ -31,7 +34,7 @@ if [ "$ROLE_COUNT" -eq "0" ]; then
     
     echo "✅ Seeders ejecutados exitosamente"
 else
-    echo "✅ Datos ya existen, omitiendo seeders"
+    echo "✅ Datos ya existen ($USER_COUNT usuarios), omitiendo seeders"
 fi
 
 # Limpiar cachés
